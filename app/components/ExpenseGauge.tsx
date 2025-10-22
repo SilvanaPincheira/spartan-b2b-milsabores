@@ -48,7 +48,6 @@ export default function ExpenseGauge() {
           />
           <RadialBar
             background
-            clockWise
             dataKey="value"
             cornerRadius={15}
             fill={fillColor}
