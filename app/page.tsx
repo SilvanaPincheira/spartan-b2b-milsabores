@@ -59,61 +59,61 @@ export default function Dashboard() {
       </section>
 
      
-{/* SECCIÓN ODOMETRO + TOP 10 */}
-<section className="flex flex-col lg:flex-row justify-between items-start mt-12 gap-8">
-  
-  {/* ODOMETRO IZQUIERDA */}
-  <div className="flex flex-col items-center bg-neutral-900 rounded-2xl p-6 w-full lg:w-1/2 shadow-md border border-neutral-800">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start mt-8">
+  {/* ODOMETRO */}
+  <div className="bg-neutral-900 rounded-2xl p-6 flex flex-col items-center justify-center shadow-md">
     <h2 className="text-lg font-semibold mb-3 text-amber-400">
       Avance presupuesto de Gastos
     </h2>
-    <GaugeChart
-      id="gauge-chart"
-      nrOfLevels={20}
-      percent={0.53}
-      colors={["#dc2626", "#eab308", "#16a34a"]}
-      arcWidth={0.3}
-      textColor="#ffffff"
-    />
-    <p className="mt-4 text-3xl font-bold text-amber-400">53%</p>
+    <div className="scale-[0.8] w-full max-w-[400px] mx-auto"> {/* 👈 Reduce tamaño y centra */}
+      <GaugeChart
+        id="gauge-chart"
+        nrOfLevels={20}
+        percent={0.53}
+        colors={["#dc2626", "#eab308", "#16a34a"]}
+        arcWidth={0.25}
+        textColor="#ffffff"
+        animate={false}
+      />
+    </div>
+    <p className="mt-2 text-3xl font-bold text-amber-400">53%</p>
     <p className="text-sm text-gray-400 mt-1">
-      <span className="text-white font-semibold">$11.633.263</span> de 22.000.000
+      <span className="font-semibold text-white">$11.633.263</span> de 22.000.000
     </p>
   </div>
 
-  {/* TABLA TOP 7 PRODUCTOS */}
-  <div className="w-full lg:w-1/2 bg-neutral-900 rounded-2xl p-6 shadow-md border border-neutral-800">
-    <h2 className="text-lg font-semibold text-amber-400 mb-4">Productos Top 7</h2>
+  {/* TOP 10 PRODUCTOS */}
+  <div className="bg-neutral-900 rounded-2xl p-6 shadow-md">
+    <h2 className="text-lg font-semibold text-amber-400 mb-3">
+      Productos Top 5
+    </h2>
     <table className="min-w-full text-sm text-gray-300">
       <thead>
-        <tr className="text-gray-400 border-b border-neutral-700">
-          <th className="text-left pb-2">Producto</th>
-          <th className="text-right pb-2">Prom. Mensual (Kg)</th>
-          <th className="text-right pb-2">Prom. Mensual ($)</th>
+        <tr className="text-amber-400 border-b border-neutral-700">
+          <th className="pb-2 text-left">Producto</th>
+          <th className="pb-2 text-right">Prom. Mensual (Kg)</th>
+          <th className="pb-2 text-right">Prom. Mensual ($)</th>
         </tr>
       </thead>
       <tbody>
         {[
-          { producto: "Aceite Premium 5L", kg: 240, monto: 3100000 },
-          { producto: "Harina Industrial 25Kg", kg: 180, monto: 2100000 },
-          { producto: "Cacao 1Kg", kg: 130, monto: 1850000 },
-          { producto: "Azúcar Rubia 25Kg", kg: 160, monto: 1780000 },
-          { producto: "Margarina 20Kg", kg: 120, monto: 1550000 },
-          { producto: "Leche en polvo 25Kg", kg: 90, monto: 1310000 },
-          { producto: "Crema Vegetal 10L", kg: 75, monto: 1180000 },
+          ["Aceite Premium 5L", "240 kg", "$3.100.000"],
+          ["Harina Industrial 25Kg", "180 kg", "$2.100.000"],
+          ["Cacao 1Kg", "130 kg", "$1.850.000"],
+          ["Azúcar Rubia 25Kg", "160 kg", "$1.780.000"],
+          ["Margarina 20Kg", "120 kg", "$1.550.000"],
           
-        ].map((item, i) => (
-          <tr key={i} className="border-b border-neutral-800 hover:bg-neutral-800/40 transition">
-            <td className="py-2">{item.producto}</td>
-            <td className="py-2 text-right">{item.kg.toLocaleString("es-CL")} kg</td>
-            <td className="py-2 text-right">${item.monto.toLocaleString("es-CL")}</td>
+        ].map(([producto, kg, monto], i) => (
+          <tr key={i} className="border-b border-neutral-800 hover:bg-neutral-800/40">
+            <td className="py-2">{producto}</td>
+            <td className="py-2 text-right">{kg}</td>
+            <td className="py-2 text-right">{monto}</td>
           </tr>
         ))}
       </tbody>
     </table>
   </div>
-
-</section>
+</div>
 
 
 
