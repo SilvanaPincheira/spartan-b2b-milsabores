@@ -3,9 +3,6 @@
 import { useState, useEffect } from "react";
 import { AlertTriangle, FileText, Package, Receipt, BarChart, MapPin } from "lucide-react";
 import GaugeChart from "react-gauge-chart";
-import ExpenseTable from "./components/ExpenseTable";
-
-
 
 
 
@@ -49,10 +46,10 @@ export default function Dashboard() {
           Grupo Mil Sabores — Sistema de Gestión
         </p>
       </header>
-
+                    
       {/* TARJETAS KPI */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <KpiCard color="bg-neutral-800 border border-neutral-700" title="Órdenes Pendientes" value="10" icon={FileText} />
+        <KpiCard color="bg-neutral-800 border border-neutral-700" title="Órdenes Emitidas" value="10" icon={FileText} />
         <KpiCard color="bg-neutral-800 border border-neutral-700" title="Facturas Recibidas" value="24" icon={Receipt} />
         <KpiCard color="bg-neutral-800 border border-neutral-700" title="Productos Convenio" value="85" icon={Package} />
         <KpiCard color="bg-neutral-800 border border-neutral-700" title="Total acumulado" value="$120.000.000" icon={BarChart} />
@@ -61,7 +58,7 @@ export default function Dashboard() {
      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start mt-8">
   {/* ODOMETRO */}
-  <div className="bg-neutral-900 rounded-2xl p-6 flex flex-col items-center justify-center shadow-md">
+  <div className="bg-neutral-800 rounded-2xl p-6 flex flex-col items-center justify-center shadow-md">
     <h2 className="text-lg font-semibold mb-3 text-amber-400">
       Avance presupuesto de Gastos
     </h2>
@@ -116,10 +113,6 @@ export default function Dashboard() {
 </div>
 
 
-
-<section className="mt-10">
-  <ExpenseTable />
-</section>
 
 
       {/* ALERTA INFERIOR */}

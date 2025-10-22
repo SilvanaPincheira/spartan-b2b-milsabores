@@ -36,26 +36,26 @@ export default function Sidebar() {
       </div>
 
       {/* MENÚ */}
-      <nav className="flex flex-col space-y-1 w-full px-6">
-        {menu.map((item) => {
-          const Icon = item.icon;
-          const active = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                active
-                  ? "bg-neutral-800 text-amber-400"
-                  : "text-gray-300 hover:bg-neutral-800 hover:text-white"
-              }`}
-            >
-              <Icon size={18} />
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
+<nav className="flex flex-col space-y-1 w-full px-6">
+  {menu.map((item) => {
+    const Icon = item.icon;
+    const active = pathname === item.href;
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={`flex items-center gap-3 py-3 px-3 rounded-md text-[15px] font-medium transition-colors ${
+          active
+            ? "bg-neutral-800 text-amber-400"
+            : "text-gray-200 hover:bg-neutral-800 hover:text-white"
+        }`}
+      >
+        <Icon size={20} />
+        {item.name}
+      </Link>
+    );
+  })}
+</nav>
 
       {/* BOTÓN LOGIN */}
       <div className="mt-auto w-full px-6">
