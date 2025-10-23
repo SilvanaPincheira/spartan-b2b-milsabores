@@ -1,80 +1,62 @@
 "use client";
 
-import React, { useState } from "react";
-
-type ProductoConsumo = {
-  codigo: string;
-  producto: string;
-  unidad: string;
-  kilos: number;
-  [key: string]: string | number;
-};
+import React from "react";
 
 export default function ConsumosPage() {
-  const meses = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+  // === PRODUCTOS REALES ===
+  const productos = [
+    { codigo: "PTS1317405", descripcion: "DISHWASHER CAJA 4X5 KG", convenioKg: 1000 },
+    { codigo: "PTS1316405", descripcion: "RINSE AID CAJA 4X5 KG", convenioKg: 1500 },
+    { codigo: "PTS1010405", descripcion: "DELIMER CAJA 4X5 LTS", convenioKg: 1000 },
+    { codigo: "PTS0305606", descripcion: "ALCOHOL GEL 6X800 ML", convenioKg: 480 },
+    { codigo: "PTS1313405", descripcion: "DM-500 CAJA 4X5 KG", convenioKg: 2000 },
+    { codigo: "PTS1312405", descripcion: "FOAMING CAUSTIC CLEANER FP CAJA 4X5 KGS", convenioKg: 2000 },
+    { codigo: "PTS0312606", descripcion: "T2 HAND CLEANER CAJA 6X800 ML", convenioKg: 480 },
+    { codigo: "PTS1304405", descripcion: "CHLORINATED DEGREASER CAJA 4X5 KG", convenioKg: 2000 },
+    { codigo: "PTS0105405", descripcion: "CLEAN BY PEROXY CAJA 4X5 KG", convenioKg: 500 },
+    { codigo: "PTS0104020", descripcion: "SPARLAC 60 ENV 20 KGS", convenioKg: 500 },
   ];
 
-  const [productos] = useState<ProductoConsumo[]>([
-    {
-      codigo: "PT-001",
-      producto: "Detergente Industrial 20L",
-      unidad: "Kg",
-      kilos: 20,
-      Enero: 150,
-      Febrero: 130,
-      Marzo: 140,
-      Abril: 125,
-      Mayo: 135,
-      Junio: 150,
-      Julio: 145,
-      Agosto: 160,
-      Septiembre: 155,
-      Octubre: 120,
-      Noviembre: 0,
-      Diciembre: 0,
-    },
-    {
-      codigo: "PT-002",
-      producto: "Desengrasante Alcalino 10L",
-      unidad: "Kg",
-      kilos: 10,
-      Enero: 90,
-      Febrero: 95,
-      Marzo: 100,
-      Abril: 85,
-      Mayo: 110,
-      Junio: 100,
-      Julio: 105,
-      Agosto: 115,
-      Septiembre: 98,
-      Octubre: 90,
-      Noviembre: 0,
-      Diciembre: 0,
-    },
-  ]);
+  // === MESES DEL AÑO ===
+  const meses = [
+    "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
+  ];
 
-  // 🔹 Mes actual dinámico (por ejemplo Octubre 2025)
-  const mesActual = "Octubre";
+  // === SIMULAMOS CONSUMOS (DATOS INVENTADOS) ===
+  const data = productos.map((p) => {
+    const consumosMensuales = Array.from({ length: 12 }, () =>
+      Math.round(p.convenioKg * (0.8 + Math.random() * 0.5)) // entre 80% y 130%
+    );
 
-  const calcularPromedio = (p: ProductoConsumo) => {
-    const valores = meses
-      .map((m) => Number(p[m]) || 0)
-      .filter((v) => v > 0);
-    if (valores.length === 0) return 0;
-    return valores.reduce((a, b) => a + b, 0) / valores.length;
-  };
+    const mesActual = 9; // Octubre (índice 9)
+    const consumoActual = consumosMensuales[mesActual];
+    const desviacionKg = consumoActual - p.convenioKg;
+    const desviacionPct = (consumoActual / p.convenioKg - 1) * 100;
+
+    let color = "bg-green-500"; // ✅ Normal o bajo
+    if (consumoActual > p.convenioKg * 1.1) color = "bg-red-500"; // 🔴 sobreconsumo
+    else if (consumoActual > p.convenioKg * 0.9) color = "bg-yellow-400"; // 🟡 leve
+
+    return {
+      ...p,
+      consumosMensuales,
+      consumoActual,
+      desviacionKg,
+      desviacionPct,
+      color,
+    };
+  });
 
   return (
     <div className="min-h-screen bg-neutral-900 text-white p-10">
       <h1 className="text-3xl font-bold text-amber-400 mb-6">
-        📊 Reporte de Consumos — Año 2025
+        📊 Control de Consumos — Grupo Mil Sabores
       </h1>
 
       <section className="bg-neutral-800 rounded-2xl p-6 border border-neutral-700 shadow-lg">
         <h2 className="text-xl font-semibold text-amber-300 mb-4">
-          Detalle mensual por producto (Kg)
+          Desviaciones Mensuales (Kilos)
         </h2>
 
         <div className="overflow-x-auto">
@@ -82,61 +64,58 @@ export default function ConsumosPage() {
             <thead>
               <tr className="text-amber-400 border-b border-neutral-700 text-center">
                 <th className="p-2 text-left">Código</th>
-                <th className="p-2 text-left">Producto</th>
-                <th className="p-2">Unidad</th>
-                {meses.map((m) => (
-                  <th key={m} className="p-2 text-center">{m}</th>
-                ))}
-                <th className="p-2 text-center">Promedio</th>
-                <th className="p-2 text-center">Mes Actual</th>
-                <th className="p-2 text-center">Desviación</th>
+                <th className="p-2 text-left">Descripción</th>
+                <th className="p-2 text-right">Consumo Convenido (Kg)</th>
+                <th className="p-2 text-right">Consumo Mes Actual</th>
+                <th className="p-2 text-right">Desviación (Kg)</th>
+                <th className="p-2 text-center">Semáforo</th>
+                <th className="p-2 text-center">% Desviación</th>
               </tr>
             </thead>
 
             <tbody>
-              {productos.map((p, i) => {
-                const promedio = calcularPromedio(p);
-                const actual = Number(p[mesActual]) || 0;
-                const desviacion = actual - promedio;
-                const color =
-                  desviacion > 0 ? "text-green-400" :
-                  desviacion < 0 ? "text-red-400" :
-                  "text-gray-300";
-
-                return (
-                  <tr
-                    key={i}
-                    className="border-b border-neutral-800 hover:bg-neutral-700/50 transition"
+              {data.map((p, i) => (
+                <tr
+                  key={i}
+                  className="border-b border-neutral-800 hover:bg-neutral-700/40"
+                >
+                  <td className="p-2">{p.codigo}</td>
+                  <td className="p-2">{p.descripcion}</td>
+                  <td className="p-2 text-right">
+                    {p.convenioKg.toLocaleString("es-CL")}
+                  </td>
+                  <td className="p-2 text-right">
+                    {p.consumoActual.toLocaleString("es-CL")}
+                  </td>
+                  <td
+                    className={`p-2 text-right ${
+                      p.desviacionKg > 0 ? "text-red-400" : "text-green-400"
+                    }`}
                   >
-                    <td className="p-2">{p.codigo}</td>
-                    <td className="p-2">{p.producto}</td>
-                    <td className="p-2 text-center">{p.unidad}</td>
-
-                    {meses.map((m) => {
-                      const valor = Number(p[m]) || 0;
-                      return (
-                        <td key={m} className="p-2 text-center">
-                          {valor > 0 ? valor : "-"}
-                        </td>
-                      );
-                    })}
-
-                    <td className="p-2 text-center text-amber-300 font-semibold">
-                      {promedio.toFixed(1)}
-                    </td>
-                    <td className="p-2 text-center">{actual}</td>
-                    <td className={`p-2 text-center font-semibold ${color}`}>
-                      {desviacion.toFixed(1)}
-                    </td>
-                  </tr>
-                );
-              })}
+                    {p.desviacionKg > 0 ? "+" : ""}
+                    {p.desviacionKg.toLocaleString("es-CL")}
+                  </td>
+                  <td className="p-2 text-center">
+                    <span
+                      className={`inline-block w-3 h-3 rounded-full ${p.color}`}
+                    ></span>
+                  </td>
+                  <td
+                    className={`p-2 text-center ${
+                      p.desviacionPct > 0 ? "text-red-400" : "text-green-400"
+                    }`}
+                  >
+                    {p.desviacionPct > 0 ? "+" : ""}
+                    {p.desviacionPct.toFixed(1)}%
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
 
-        <p className="text-sm text-gray-400 mt-4 text-right">
-          *Datos de consumo total por producto en kilogramos (Kg) — actualizados Octubre 2025
+        <p className="text-gray-400 text-xs mt-4 italic text-right">
+          * Los valores corresponden a consumo estimado para Octubre 2025.
         </p>
       </section>
     </div>
