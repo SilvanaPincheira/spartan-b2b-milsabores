@@ -49,10 +49,10 @@ export default function Dashboard() {
 
       {/* TARJETAS KPI */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <KpiCard color="bg-neutral-800 border border-neutral-700" title="Órdenes Pendientes" value="10" icon={FileText} />
+        <KpiCard color="bg-neutral-800 border border-neutral-700" title="Órdenes Pendientes" value="3" icon={FileText} />
         <KpiCard color="bg-neutral-800 border border-neutral-700" title="Facturas Recibidas" value="24" icon={Receipt} />
-        <KpiCard color="bg-neutral-800 border border-neutral-700" title="Productos Convenio" value="85" icon={Package} />
-        <KpiCard color="bg-neutral-800 border border-neutral-700" title="Total acumulado" value="$120.000.000" icon={BarChart} />
+        <KpiCard color="bg-neutral-800 border border-neutral-700" title="Productos Convenio" value="10" icon={Package} />
+        <KpiCard color="bg-neutral-800 border border-neutral-700" title="Total acumulado 2025" value="$120.000.000" icon={BarChart} />
       </section>
 
      
@@ -88,17 +88,17 @@ export default function Dashboard() {
       <thead>
         <tr className="text-amber-400 border-b border-neutral-700">
           <th className="pb-2 text-left">Producto</th>
-          <th className="pb-2 text-right">consumo Mensual (Kg)</th>
-          <th className="pb-2 text-right">Consumo Tope Mensual (Kg)</th>
+          <th className="pb-2 text-right">consumo Tope Mensual (Kg)</th>
+          <th className="pb-2 text-right">Consumo Actual (Kg)</th>
         </tr>
       </thead>
       <tbody>
         {[
-          ["Aceite Premium 5L", "240 kg", "210 kg"],
-          ["Harina Industrial 25Kg", "180 kg", "220 kg"],
-          ["Cacao 1Kg", "130 kg", "100"],
-          ["Azúcar Rubia 25Kg", "160 kg", "300 kg"],
-          ["Margarina 20Kg", "120 kg", "10 kg"],
+          ["DISHWASHER CAJA 4X5 KG", "1000 kg", "836 kg"],
+          ["RINSE AID CAJA 4X5 KG", "1500 kg", "1936 kg"],
+          ["DELIMER CAJA 4X5 LTS", "1000 kg", "921 kg"],
+          ["ALCOHOL GEL 6X800 ML", "480 kg", "389 kg"],
+          ["DM-500 CAJA 4X5 KG", "2000 kg", "1812 kg"],
           
         ].map(([producto, kg, monto], i) => (
           <tr key={i} className="border-b border-neutral-800 hover:bg-neutral-800/40">
