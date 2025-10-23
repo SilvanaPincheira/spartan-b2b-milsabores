@@ -2,8 +2,8 @@ import "./globals.css";
 import Sidebar from "./components/Sidebar";
 
 export const metadata = {
-  title: "Control de Gastos – Mil Sabores",
-  description: "Panel de control de gastos y órdenes de compra de Grupo Mil Sabores",
+  title: "Portal B2B – Mil Sabores",
+  description: "Panel de control de consumos y órdenes de compra de Grupo Mil Sabores",
 };
 
 export default function RootLayout({

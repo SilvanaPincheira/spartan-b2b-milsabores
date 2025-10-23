@@ -3,9 +3,6 @@
 import { useState, useEffect } from "react";
 import { AlertTriangle, FileText, Package, Receipt, BarChart, MapPin } from "lucide-react";
 import GaugeChart from "react-gauge-chart";
-import ExpenseTable from "./components/ExpenseTable";
-
-
 
 
 
@@ -63,7 +60,7 @@ export default function Dashboard() {
   {/* ODOMETRO */}
   <div className="bg-neutral-900 rounded-2xl p-6 flex flex-col items-center justify-center shadow-md">
     <h2 className="text-lg font-semibold mb-3 text-amber-400">
-      Avance presupuesto de Gastos
+      Avance presupuesto de Consumo Mensual
     </h2>
     <div className="scale-[0.8] w-full max-w-[400px] mx-auto"> {/* 👈 Reduce tamaño y centra */}
       <GaugeChart
@@ -85,23 +82,23 @@ export default function Dashboard() {
   {/* TOP 10 PRODUCTOS */}
   <div className="bg-neutral-900 rounded-2xl p-6 shadow-md">
     <h2 className="text-lg font-semibold text-amber-400 mb-3">
-      Productos Top 5
+      Consumo Actual 
     </h2>
     <table className="min-w-full text-sm text-gray-300">
       <thead>
         <tr className="text-amber-400 border-b border-neutral-700">
           <th className="pb-2 text-left">Producto</th>
-          <th className="pb-2 text-right">Prom. Mensual (Kg)</th>
-          <th className="pb-2 text-right">Prom. Mensual ($)</th>
+          <th className="pb-2 text-right">consumo Mensual (Kg)</th>
+          <th className="pb-2 text-right">Consumo Tope Mensual (Kg)</th>
         </tr>
       </thead>
       <tbody>
         {[
-          ["Aceite Premium 5L", "240 kg", "$3.100.000"],
-          ["Harina Industrial 25Kg", "180 kg", "$2.100.000"],
-          ["Cacao 1Kg", "130 kg", "$1.850.000"],
-          ["Azúcar Rubia 25Kg", "160 kg", "$1.780.000"],
-          ["Margarina 20Kg", "120 kg", "$1.550.000"],
+          ["Aceite Premium 5L", "240 kg", "210 kg"],
+          ["Harina Industrial 25Kg", "180 kg", "220 kg"],
+          ["Cacao 1Kg", "130 kg", "100"],
+          ["Azúcar Rubia 25Kg", "160 kg", "300 kg"],
+          ["Margarina 20Kg", "120 kg", "10 kg"],
           
         ].map(([producto, kg, monto], i) => (
           <tr key={i} className="border-b border-neutral-800 hover:bg-neutral-800/40">
@@ -117,9 +114,6 @@ export default function Dashboard() {
 
 
 
-<section className="mt-10">
-  <ExpenseTable />
-</section>
 
 
       {/* ALERTA INFERIOR */}

@@ -9,7 +9,7 @@ export default function Header() {
       
 
         <h1 className="text-lg font-semibold">
-          Control de Gastos – Mil Sabores
+          Portal B2B – Mil Sabores
         </h1>
       </div>
 
