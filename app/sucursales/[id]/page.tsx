@@ -17,7 +17,11 @@ export default function SucursalDetalle() {
   const router = useRouter();
   const { id } = useParams();
 
-  // Datos base de sucursal
+  // 🔹 Hooks deben ir siempre arriba
+  const [mostrarTodo, setMostrarTodo] = useState(false);
+  const [mesSeleccionado, setMesSeleccionado] = useState("Octubre");
+
+  // 🔹 Datos base
   const sucursales = [
     {
       id: "3",
@@ -34,10 +38,12 @@ export default function SucursalDetalle() {
   ];
 
   const sucursal = sucursales.find((s) => s.id === id);
-  if (!sucursal)
-    return <div className="p-6 text-gray-400">Sucursal no encontrada.</div>;
 
-  // Historial de pedidos (6 meses)
+  if (!sucursal) {
+    return <div className="p-6 text-gray-400">Sucursal no encontrada.</div>;
+  }
+
+  // 🔹 Historial de pedidos (6 meses)
   const historial = [
     { mes: "Mayo", pedidos: 7 },
     { mes: "Junio", pedidos: 5 },
@@ -47,11 +53,9 @@ export default function SucursalDetalle() {
     { mes: "Octubre", pedidos: 9 },
   ];
 
-  const [mostrarTodo, setMostrarTodo] = useState(false);
   const mesesMostrados = mostrarTodo ? historial : historial.slice(-3);
-  const [mesSeleccionado, setMesSeleccionado] = useState("Octubre");
 
-  // Convenio general de productos
+  // 🔹 Convenio general de productos
   const productosConvenio = [
     { codigo: "PTS1317495", desc: "DISHWASHER CAJA 4X5 KG", precio: 3902 },
     { codigo: "PTS1316495", desc: "RINSE AID CAJA 4X5 KG", precio: 3497 },
@@ -65,21 +69,21 @@ export default function SucursalDetalle() {
     { codigo: "PTS0104020", desc: "SPARLAC 60 ENV 20 KGS", precio: 7290 },
   ];
 
-  // Función para generar consumo mensual variable
+  // 🔹 Generador de consumo mensual variable
   const generarMes = (productos: any[]) => {
-    const cantidadProductos = Math.floor(Math.random() * 6) + 4; // entre 4 y 10 productos
+    const cantidadProductos = Math.floor(Math.random() * 6) + 4;
     const seleccionados = [...productos]
       .sort(() => 0.5 - Math.random())
       .slice(0, cantidadProductos);
 
     return seleccionados.map((p) => {
-      const kilos = Math.floor(Math.random() * 1700) + 300; // entre 300 y 2000 kg
+      const kilos = Math.floor(Math.random() * 1700) + 300;
       const monto = kilos * p.precio;
       return { ...p, kilos, monto };
     });
   };
 
-  // Generar detalle de los últimos 6 meses
+  // 🔹 Generar detalle de los últimos 6 meses
   const pedidosMensuales: Record<string, any[]> = {
     Mayo: generarMes(productosConvenio),
     Junio: generarMes(productosConvenio),
@@ -89,14 +93,14 @@ export default function SucursalDetalle() {
     Octubre: generarMes(productosConvenio),
   };
 
-  // Cálculo sugerido
+  // 🔹 Cálculo de sugerido (demo)
   const ultimos3 = historial.slice(-3).map((h) => h.pedidos);
   const sugeridoUnidades = Math.round(
     ultimos3.reduce((a, b) => a + b, 0) / ultimos3.length
   );
   const sugeridoPesos = Math.round((sugeridoUnidades * 350000) / 10);
 
-  // Avance consumo
+  // 🔹 Avance consumo
   const porcentaje = Math.min(
     (sucursal.totalConsumo / sucursal.topeMensual) * 100,
     100
@@ -125,11 +129,7 @@ export default function SucursalDetalle() {
 
       {/* KPIs */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <KpiCard
-          icon={Gauge}
-          titulo="Consumo Total"
-          valor={`$${sucursal.totalConsumo.toLocaleString("es-CL")}`}
-        />
+        <KpiCard icon={Gauge} titulo="Consumo Total" valor={`$${sucursal.totalConsumo.toLocaleString("es-CL")}`} />
         <KpiCard icon={Receipt} titulo="Facturas" valor={sucursal.facturas} />
         <KpiCard icon={FileText} titulo="Órdenes" valor={sucursal.ordenes} />
         <KpiCard icon={Package} titulo="Productos" valor={sucursal.productos} />
@@ -164,10 +164,7 @@ export default function SucursalDetalle() {
           </thead>
           <tbody>
             {mesesMostrados.map((m, i) => (
-              <tr
-                key={i}
-                className="border-b border-neutral-800 hover:bg-neutral-800/40"
-              >
+              <tr key={i} className="border-b border-neutral-800 hover:bg-neutral-800/40">
                 <td className="py-2">{m.mes}</td>
                 <td className="py-2 text-right">{m.pedidos}</td>
               </tr>
@@ -195,9 +192,7 @@ export default function SucursalDetalle() {
             className="bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-1 text-sm text-gray-200"
           >
             {Object.keys(pedidosMensuales).map((mes) => (
-              <option key={mes} value={mes}>
-                {mes}
-              </option>
+              <option key={mes} value={mes}>{mes}</option>
             ))}
           </select>
         </div>
@@ -213,16 +208,11 @@ export default function SucursalDetalle() {
           </thead>
           <tbody>
             {pedidosMensuales[mesSeleccionado].map((p, i) => (
-              <tr
-                key={i}
-                className="border-b border-neutral-800 hover:bg-neutral-800/40"
-              >
+              <tr key={i} className="border-b border-neutral-800 hover:bg-neutral-800/40">
                 <td className="py-2">{p.codigo}</td>
                 <td className="py-2">{p.desc}</td>
                 <td className="py-2 text-right">{p.kilos.toLocaleString("es-CL")} kg</td>
-                <td className="py-2 text-right">
-                  ${p.monto.toLocaleString("es-CL")}
-                </td>
+                <td className="py-2 text-right">${p.monto.toLocaleString("es-CL")}</td>
               </tr>
             ))}
           </tbody>
