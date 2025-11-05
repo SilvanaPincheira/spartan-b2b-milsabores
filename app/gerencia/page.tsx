@@ -7,7 +7,7 @@ export default function GerenciaPage() {
   const [zonaSeleccionada, setZonaSeleccionada] = useState<string | null>(null);
 
   /* =====================================================
-     DATOS BASE: Razones sociales con presupuesto anual
+     PRESUPUESTO ANUAL POR RAZÓN SOCIAL
   ===================================================== */
   const razones = [
     { nombre: "Grupo Mil Sabores", presupuesto: 100_000_000 },
@@ -16,22 +16,79 @@ export default function GerenciaPage() {
   ];
 
   /* =====================================================
-     COMPRAS SIMULADAS (monto mes, 3 meses y acumulado)
+     ESTRUCTURA: RAZÓN → ZONA → SUCURSALES
+     Los montos cuadran con los totales por razón social
   ===================================================== */
-  const compras = [
-    // Grupo Mil Sabores (supera presupuesto)
-    { razon: "Grupo Mil Sabores", zona: "Zona 1", sucursal: "Tobalaba – Tanta", mes: 14_500_000, ult3m: 37_000_000, acumulado: 41_000_000 },
-    { razon: "Grupo Mil Sabores", zona: "Zona 2", sucursal: "Providencia – Panchita", mes: 11_200_000, ult3m: 32_000_000, acumulado: 36_000_000 },
-    { razon: "Grupo Mil Sabores", zona: "Zona 3", sucursal: "Huechuraba – La Mar", mes: 10_800_000, ult3m: 31_000_000, acumulado: 35_000_000 },
-
-    // Grupo Los Robles (casi al límite)
-    { razon: "Grupo Los Robles", zona: "Zona 4", sucursal: "Las Condes – Osaka", mes: 8_900_000, ult3m: 26_000_000, acumulado: 39_000_000 },
-    { razon: "Grupo Los Robles", zona: "Zona 5", sucursal: "Ñuñoa – Los Robles", mes: 9_100_000, ult3m: 27_000_000, acumulado: 39_000_000 },
-
-    // Grupo Jalisco (bajo el presupuesto)
-    { razon: "Grupo Jalisco", zona: "Zona 7", sucursal: "La Florida – Jalisco", mes: 7_200_000, ult3m: 20_000_000, acumulado: 38_000_000 },
-    { razon: "Grupo Jalisco", zona: "Zona 8", sucursal: "Tobalaba – Jalisco", mes: 6_400_000, ult3m: 18_000_000, acumulado: 37_000_000 },
+  const zonasData = [
+    {
+      razon: "Grupo Mil Sabores",
+      zonas: [
+        {
+          nombre: "Zona 1 – Oriente",
+          sucursales: [
+            { nombre: "Tobalaba – Tanta", mes: 14_500_000, ult3m: 37_000_000, acumulado: 41_000_000 },
+            { nombre: "Providencia – Panchita", mes: 11_200_000, ult3m: 32_000_000, acumulado: 36_000_000 },
+          ],
+        },
+        {
+          nombre: "Zona 2 – Norte",
+          sucursales: [
+            { nombre: "Huechuraba – La Mar", mes: 10_800_000, ult3m: 31_000_000, acumulado: 35_000_000 },
+          ],
+        },
+      ],
+    },
+    {
+      razon: "Grupo Los Robles",
+      zonas: [
+        {
+          nombre: "Zona 4 – Centro",
+          sucursales: [
+            { nombre: "Las Condes – Osaka", mes: 8_900_000, ult3m: 26_000_000, acumulado: 39_000_000 },
+          ],
+        },
+        {
+          nombre: "Zona 5 – Ñuñoa",
+          sucursales: [
+            { nombre: "Ñuñoa – Los Robles", mes: 9_100_000, ult3m: 27_000_000, acumulado: 39_000_000 },
+          ],
+        },
+      ],
+    },
+    {
+      razon: "Grupo Jalisco",
+      zonas: [
+        {
+          nombre: "Zona 7 – Sur",
+          sucursales: [
+            { nombre: "La Florida – Jalisco", mes: 7_200_000, ult3m: 20_000_000, acumulado: 38_000_000 },
+          ],
+        },
+        {
+          nombre: "Zona 8 – Oriente",
+          sucursales: [
+            { nombre: "Tobalaba – Jalisco", mes: 6_400_000, ult3m: 18_000_000, acumulado: 37_000_000 },
+          ],
+        },
+      ],
+    },
   ];
+
+  /* =====================================================
+     TRANSFORMAR ZONAS EN MATRIZ PLANA CONSISTENTE
+  ===================================================== */
+  const compras = zonasData.flatMap((r) =>
+    r.zonas.flatMap((z) =>
+      z.sucursales.map((s) => ({
+        razon: r.razon,
+        zona: z.nombre,
+        sucursal: s.nombre,
+        mes: s.mes,
+        ult3m: s.ult3m,
+        acumulado: s.acumulado,
+      }))
+    )
+  );
 
   /* =====================================================
      CÁLCULOS GLOBALES
@@ -68,46 +125,44 @@ export default function GerenciaPage() {
   });
 
   /* =====================================================
-     AGRUPAR POR ZONA
+     AGRUPAR POR ZONA CONSISTENTE
   ===================================================== */
-  const zonas = Array.from(new Set(compras.map((c) => c.zona))).map((z) => {
-    const grupo = compras.filter((c) => c.zona === z);
-    const razon = grupo[0].razon;
-    const mes = grupo.reduce((a, b) => a + b.mes, 0);
-    const ult3m = grupo.reduce((a, b) => a + b.ult3m, 0);
-    const acumulado = grupo.reduce((a, b) => a + b.acumulado, 0);
+  const zonas = zonasData.flatMap((r) =>
+    r.zonas.map((z) => {
+      const mes = z.sucursales.reduce((a, b) => a + b.mes, 0);
+      const ult3m = z.sucursales.reduce((a, b) => a + b.ult3m, 0);
+      const acumulado = z.sucursales.reduce((a, b) => a + b.acumulado, 0);
+      const presupuestoRazon = razones.find((rs) => rs.nombre === r.razon)?.presupuesto || 0;
+      const presupuestoZona = presupuestoRazon / r.zonas.length;
+      const avanceZona = (acumulado / presupuestoZona) * 100;
 
-    // Presupuesto zonal (10 zonas por grupo)
-    const razonPresupuesto = razones.find((r) => r.nombre === razon)?.presupuesto || 0;
-    const presupuestoZona = razonPresupuesto / 10;
-    const avanceZona = (acumulado / presupuestoZona) * 100;
+      const estadoColor =
+        avanceZona >= 100
+          ? "text-red-500"
+          : avanceZona >= 80
+          ? "text-amber-400"
+          : "text-green-500";
+      const estadoTexto =
+        avanceZona >= 100
+          ? "Sobre Presupuesto"
+          : avanceZona >= 80
+          ? "Cercano al Tope"
+          : "En Rango";
 
-    const estadoColor =
-      avanceZona >= 100
-        ? "text-red-500"
-        : avanceZona >= 80
-        ? "text-amber-400"
-        : "text-green-500";
-    const estadoTexto =
-      avanceZona >= 100
-        ? "Sobre Presupuesto"
-        : avanceZona >= 80
-        ? "Cercano al Tope"
-        : "En Rango";
-
-    return {
-      nombre: z,
-      razon,
-      mes,
-      ult3m,
-      acumulado,
-      presupuestoZona,
-      avanceZona,
-      estadoColor,
-      estadoTexto,
-      sucursales: grupo,
-    };
-  });
+      return {
+        razon: r.razon,
+        nombre: z.nombre,
+        mes,
+        ult3m,
+        acumulado,
+        presupuestoZona,
+        avanceZona,
+        estadoColor,
+        estadoTexto,
+        sucursales: z.sucursales,
+      };
+    })
+  );
 
   /* =====================================================
      RENDER
@@ -129,7 +184,7 @@ export default function GerenciaPage() {
         <ResumenCard icon={Users} titulo="Acumulado Anual" valor={totalAcum} />
       </section>
 
-      {/* BARRA GLOBAL DE AVANCE */}
+      {/* BARRA GLOBAL */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 mb-10 shadow">
         <h2 className="text-lg font-semibold text-amber-400 mb-3">
           Presupuesto Global vs Acumulado
@@ -146,7 +201,7 @@ export default function GerenciaPage() {
         </p>
       </div>
 
-      {/* COMPARATIVO POR RAZÓN SOCIAL */}
+      {/* POR RAZÓN SOCIAL */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 mb-10">
         <h2 className="text-lg font-semibold text-amber-400 mb-4">
           Comparativo por Razón Social
@@ -227,12 +282,12 @@ export default function GerenciaPage() {
                       key={j}
                       className="border-b border-neutral-900 bg-neutral-950/40 text-gray-400"
                     >
-                      <td className="py-2 pl-8">↳ {s.sucursal}</td>
-                      <td className="py-2">{s.razon}</td>
+                      <td className="py-2 pl-8">↳ {s.nombre}</td>
+                      <td className="py-2">{z.razon}</td>
                       <td className="py-2 text-right">${s.mes.toLocaleString("es-CL")}</td>
                       <td className="py-2 text-right">${s.ult3m.toLocaleString("es-CL")}</td>
                       <td className="py-2 text-right">${s.acumulado.toLocaleString("es-CL")}</td>
-                      <td className="py-2"></td>
+                      <td></td>
                       <td></td>
                     </tr>
                   ))}
@@ -245,9 +300,7 @@ export default function GerenciaPage() {
   );
 }
 
-/* =====================================================
-   COMPONENTE DE CARD GLOBAL
-===================================================== */
+/* CARD RESUMEN GLOBAL */
 function ResumenCard({ icon: Icon, titulo, valor }: any) {
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 flex flex-col items-start justify-between hover:bg-neutral-800/70 transition">
