@@ -17,7 +17,7 @@ export default function SucursalDetalle() {
   const router = useRouter();
   const { id } = useParams();
 
-  // 🔹 Hooks deben ir siempre arriba
+  // 🔹 Hooks
   const [mostrarTodo, setMostrarTodo] = useState(false);
   const [mesSeleccionado, setMesSeleccionado] = useState("Octubre");
 
@@ -38,10 +38,8 @@ export default function SucursalDetalle() {
   ];
 
   const sucursal = sucursales.find((s) => s.id === id);
-
-  if (!sucursal) {
+  if (!sucursal)
     return <div className="p-6 text-gray-400">Sucursal no encontrada.</div>;
-  }
 
   // 🔹 Historial de pedidos (6 meses)
   const historial = [
@@ -52,10 +50,9 @@ export default function SucursalDetalle() {
     { mes: "Septiembre", pedidos: 5 },
     { mes: "Octubre", pedidos: 9 },
   ];
-
   const mesesMostrados = mostrarTodo ? historial : historial.slice(-3);
 
-  // 🔹 Convenio general de productos
+  // 🔹 Productos convenio
   const productosConvenio = [
     { codigo: "PTS1317495", desc: "DISHWASHER CAJA 4X5 KG", precio: 3902 },
     { codigo: "PTS1316495", desc: "RINSE AID CAJA 4X5 KG", precio: 3497 },
@@ -69,12 +66,10 @@ export default function SucursalDetalle() {
     { codigo: "PTS0104020", desc: "SPARLAC 60 ENV 20 KGS", precio: 7290 },
   ];
 
-  // 🔹 Generador de consumo mensual variable
+  // 🔹 Función para generar consumo mensual variable
   const generarMes = (productos: any[]) => {
     const cantidadProductos = Math.floor(Math.random() * 6) + 4;
-    const seleccionados = [...productos]
-      .sort(() => 0.5 - Math.random())
-      .slice(0, cantidadProductos);
+    const seleccionados = [...productos].sort(() => 0.5 - Math.random()).slice(0, cantidadProductos);
 
     return seleccionados.map((p) => {
       const kilos = Math.floor(Math.random() * 1700) + 300;
@@ -83,7 +78,7 @@ export default function SucursalDetalle() {
     });
   };
 
-  // 🔹 Generar detalle de los últimos 6 meses
+  // 🔹 Detalle de los últimos 6 meses
   const pedidosMensuales: Record<string, any[]> = {
     Mayo: generarMes(productosConvenio),
     Junio: generarMes(productosConvenio),
@@ -93,18 +88,30 @@ export default function SucursalDetalle() {
     Octubre: generarMes(productosConvenio),
   };
 
-  // 🔹 Cálculo de sugerido (demo)
-  const ultimos3 = historial.slice(-3).map((h) => h.pedidos);
-  const sugeridoUnidades = Math.round(
-    ultimos3.reduce((a, b) => a + b, 0) / ultimos3.length
-  );
-  const sugeridoPesos = Math.round((sugeridoUnidades * 350000) / 10);
+  // 🔹 Cálculo del pedido sugerido (promedio por producto de los últimos 3 meses)
+  const mesesReferencia = ["Agosto", "Septiembre", "Octubre"];
+  const sugerido: any[] = [];
+
+  productosConvenio.forEach((prod) => {
+    const consumos = mesesReferencia.map(
+      (mes) =>
+        pedidosMensuales[mes].find((p) => p.codigo === prod.codigo)?.kilos || 0
+    );
+    const promedioKilos =
+      consumos.reduce((a, b) => a + b, 0) / consumos.filter((v) => v > 0).length || 0;
+    if (promedioKilos > 0) {
+      sugerido.push({
+        ...prod,
+        promedioKilos: Math.round(promedioKilos),
+        monto: Math.round(promedioKilos * prod.precio),
+      });
+    }
+  });
+
+  const totalSugerido = sugerido.reduce((acc, p) => acc + p.monto, 0);
 
   // 🔹 Avance consumo
-  const porcentaje = Math.min(
-    (sucursal.totalConsumo / sucursal.topeMensual) * 100,
-    100
-  );
+  const porcentaje = Math.min((sucursal.totalConsumo / sucursal.topeMensual) * 100, 100);
   const color =
     porcentaje < 70
       ? "bg-red-600"
@@ -219,19 +226,45 @@ export default function SucursalDetalle() {
         </table>
       </div>
 
-      {/* SUGERIDO */}
+      {/* PEDIDO SUGERIDO */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-amber-400 mb-2">
+        <h2 className="text-lg font-semibold text-amber-400 mb-3">
           Pedido Sugerido — Noviembre 2025
         </h2>
-        <p className="text-gray-300 mb-4">
-          Promedio últimos 3 meses:{" "}
-          <span className="text-white font-semibold">{sugeridoUnidades} pedidos</span>{" "}
-          (~${sugeridoPesos.toLocaleString("es-CL")})
+        <p className="text-gray-400 text-sm mb-4">
+          Basado en el promedio de consumo de los últimos 3 meses (Agosto, Septiembre, Octubre)
         </p>
+
+        <table className="min-w-full text-sm text-gray-300 mb-4">
+          <thead>
+            <tr className="text-amber-400 border-b border-neutral-700">
+              <th className="text-left py-2">Código</th>
+              <th className="text-left py-2">Producto</th>
+              <th className="text-right py-2">Promedio Kg</th>
+              <th className="text-right py-2">Precio Unit.</th>
+              <th className="text-right py-2">Monto Sugerido</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sugerido.map((p, i) => (
+              <tr key={i} className="border-b border-neutral-800 hover:bg-neutral-800/40">
+                <td className="py-2">{p.codigo}</td>
+                <td className="py-2">{p.desc}</td>
+                <td className="py-2 text-right">{p.promedioKilos.toLocaleString("es-CL")} kg</td>
+                <td className="py-2 text-right">${p.precio.toLocaleString("es-CL")}</td>
+                <td className="py-2 text-right">${p.monto.toLocaleString("es-CL")}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <p className="text-right font-semibold text-white">
+          Total sugerido: <span className="text-amber-400">${totalSugerido.toLocaleString("es-CL")}</span>
+        </p>
+
         <button
           onClick={() => alert("Función demo: Crear pedido sugerido")}
-          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black font-semibold px-4 py-2 rounded-lg transition"
+          className="mt-5 flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black font-semibold px-4 py-2 rounded-lg transition"
         >
           <PlusCircle size={18} />
           Crear pedido sugerido
@@ -241,7 +274,7 @@ export default function SucursalDetalle() {
   );
 }
 
-// KPI CARD COMPONENT
+// KPI CARD
 function KpiCard({ icon: Icon, titulo, valor }: any) {
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 flex flex-col justify-between hover:bg-neutral-800/70 transition">
