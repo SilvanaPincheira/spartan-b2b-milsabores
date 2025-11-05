@@ -6,31 +6,41 @@ import { BarChart3, Building2, Users, DollarSign, Circle } from "lucide-react";
 export default function GerenciaPage() {
   const [zonaSeleccionada, setZonaSeleccionada] = useState<string | null>(null);
 
-  // 🔹 Datos simulados base
+  /* =====================================================
+     DATOS BASE: Razones sociales con presupuesto anual
+  ===================================================== */
   const razones = [
-    { nombre: "Grupo Mil Sabores", presupuesto: 120000000 },
-    { nombre: "Grupo Los Robles", presupuesto: 95000000 },
-    { nombre: "Grupo Jalisco", presupuesto: 88000000 },
+    { nombre: "Grupo Mil Sabores", presupuesto: 100_000_000 },
+    { nombre: "Grupo Los Robles", presupuesto: 90_000_000 },
+    { nombre: "Grupo Jalisco", presupuesto: 120_000_000 },
   ];
 
-  // 🔹 Compras simuladas
+  /* =====================================================
+     COMPRAS SIMULADAS (monto mes, 3 meses y acumulado)
+  ===================================================== */
   const compras = [
-    { razon: "Grupo Mil Sabores", zona: "Zona 1", sucursal: "Tobalaba – Tanta", mes: 13500000, ult3m: 37500000, acumulado: 112000000 },
-    { razon: "Grupo Mil Sabores", zona: "Zona 2", sucursal: "Providencia – Panchita", mes: 9800000, ult3m: 31000000, acumulado: 98700000 },
-    { razon: "Grupo Los Robles", zona: "Zona 4", sucursal: "Tobalaba – Osaka", mes: 8800000, ult3m: 27300000, acumulado: 90400000 },
-    { razon: "Grupo Jalisco", zona: "Zona 7", sucursal: "La Florida – Jalisco", mes: 11200000, ult3m: 31200000, acumulado: 97400000 },
-    { razon: "Grupo Jalisco", zona: "Zona 7", sucursal: "Tobalaba – Jalisco", mes: 7600000, ult3m: 21800000, acumulado: 78500000 },
-    { razon: "Grupo Mil Sabores", zona: "Zona 3", sucursal: "Huechuraba – La Mar", mes: 10200000, ult3m: 29500000, acumulado: 88900000 },
-    { razon: "Grupo Los Robles", zona: "Zona 5", sucursal: "Las Condes – Osaka", mes: 9700000, ult3m: 28400000, acumulado: 87200000 },
-    { razon: "Grupo Mil Sabores", zona: "Zona 1", sucursal: "Tobalaba – Panchita", mes: 9400000, ult3m: 26000000, acumulado: 81000000 },
+    // Grupo Mil Sabores (supera presupuesto)
+    { razon: "Grupo Mil Sabores", zona: "Zona 1", sucursal: "Tobalaba – Tanta", mes: 14_500_000, ult3m: 37_000_000, acumulado: 41_000_000 },
+    { razon: "Grupo Mil Sabores", zona: "Zona 2", sucursal: "Providencia – Panchita", mes: 11_200_000, ult3m: 32_000_000, acumulado: 36_000_000 },
+    { razon: "Grupo Mil Sabores", zona: "Zona 3", sucursal: "Huechuraba – La Mar", mes: 10_800_000, ult3m: 31_000_000, acumulado: 35_000_000 },
+
+    // Grupo Los Robles (casi al límite)
+    { razon: "Grupo Los Robles", zona: "Zona 4", sucursal: "Las Condes – Osaka", mes: 8_900_000, ult3m: 26_000_000, acumulado: 39_000_000 },
+    { razon: "Grupo Los Robles", zona: "Zona 5", sucursal: "Ñuñoa – Los Robles", mes: 9_100_000, ult3m: 27_000_000, acumulado: 39_000_000 },
+
+    // Grupo Jalisco (bajo el presupuesto)
+    { razon: "Grupo Jalisco", zona: "Zona 7", sucursal: "La Florida – Jalisco", mes: 7_200_000, ult3m: 20_000_000, acumulado: 38_000_000 },
+    { razon: "Grupo Jalisco", zona: "Zona 8", sucursal: "Tobalaba – Jalisco", mes: 6_400_000, ult3m: 18_000_000, acumulado: 37_000_000 },
   ];
 
-  // 🔹 Totales globales
+  /* =====================================================
+     CÁLCULOS GLOBALES
+  ===================================================== */
   const totalMes = compras.reduce((a, b) => a + b.mes, 0);
   const total3m = compras.reduce((a, b) => a + b.ult3m, 0);
   const totalAcum = compras.reduce((a, b) => a + b.acumulado, 0);
   const presupuestoGlobal = razones.reduce((a, b) => a + b.presupuesto, 0);
-  const avanceGlobal = Math.min((totalAcum / presupuestoGlobal) * 100, 120);
+  const avanceGlobal = Math.min((totalAcum / presupuestoGlobal) * 100, 150);
 
   const colorBarra =
     avanceGlobal >= 100
@@ -39,7 +49,9 @@ export default function GerenciaPage() {
       ? "bg-amber-500"
       : "bg-green-600";
 
-  // 🔹 Totales por razón social
+  /* =====================================================
+     COMPARATIVO POR RAZÓN SOCIAL
+  ===================================================== */
   const totalesPorRazon = razones.map((r) => {
     const grupo = compras.filter((c) => c.razon === r.nombre);
     const mes = grupo.reduce((a, b) => a + b.mes, 0);
@@ -55,7 +67,9 @@ export default function GerenciaPage() {
     return { ...r, mes, ult3m, acumulado, avance, estadoColor, estadoTexto };
   });
 
-  // 🔹 Agrupar por zona
+  /* =====================================================
+     AGRUPAR POR ZONA
+  ===================================================== */
   const zonas = Array.from(new Set(compras.map((c) => c.zona))).map((z) => {
     const grupo = compras.filter((c) => c.zona === z);
     const razon = grupo[0].razon;
@@ -63,9 +77,9 @@ export default function GerenciaPage() {
     const ult3m = grupo.reduce((a, b) => a + b.ult3m, 0);
     const acumulado = grupo.reduce((a, b) => a + b.acumulado, 0);
 
-    // Presupuesto zonal (proporcional)
+    // Presupuesto zonal (10 zonas por grupo)
     const razonPresupuesto = razones.find((r) => r.nombre === razon)?.presupuesto || 0;
-    const presupuestoZona = razonPresupuesto / 10; // dividir en 10 zonas por simplicidad
+    const presupuestoZona = razonPresupuesto / 10;
     const avanceZona = (acumulado / presupuestoZona) * 100;
 
     const estadoColor =
@@ -95,6 +109,9 @@ export default function GerenciaPage() {
     };
   });
 
+  /* =====================================================
+     RENDER
+  ===================================================== */
   return (
     <div className="p-6 text-white">
       {/* ENCABEZADO */}
@@ -129,7 +146,7 @@ export default function GerenciaPage() {
         </p>
       </div>
 
-      {/* POR RAZÓN SOCIAL */}
+      {/* COMPARATIVO POR RAZÓN SOCIAL */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 mb-10">
         <h2 className="text-lg font-semibold text-amber-400 mb-4">
           Comparativo por Razón Social
@@ -165,7 +182,7 @@ export default function GerenciaPage() {
         </table>
       </div>
 
-      {/* POR ZONA */}
+      {/* ANÁLISIS POR ZONA */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 mb-10">
         <h2 className="text-lg font-semibold text-amber-400 mb-4">Análisis por Zona</h2>
         <table className="min-w-full text-sm text-gray-300">
@@ -228,7 +245,9 @@ export default function GerenciaPage() {
   );
 }
 
-// CARD GLOBAL
+/* =====================================================
+   COMPONENTE DE CARD GLOBAL
+===================================================== */
 function ResumenCard({ icon: Icon, titulo, valor }: any) {
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 flex flex-col items-start justify-between hover:bg-neutral-800/70 transition">
@@ -242,3 +261,4 @@ function ResumenCard({ icon: Icon, titulo, valor }: any) {
     </div>
   );
 }
+
