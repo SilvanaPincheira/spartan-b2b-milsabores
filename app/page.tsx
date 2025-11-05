@@ -151,7 +151,7 @@ export default function Dashboard() {
 
       {/* ALERTA INFERIOR */}
       <footer className="sticky bottom-0 left-0 right-0 mt-10">
-        <div className="flex items-center gap-3 bg-amber-600/90 text-black px-4 py-3 rounded-t-lg shadow-md justify-center">
+        <div className="flex items-center gap-3 bg-red-600/90 text-black px-4 py-3 rounded-t-lg shadow-md justify-center">
           <AlertTriangle size={20} className="text-black/80" />
           <span className="font-medium">
             Tiene 10 órdenes sin factura asociada
