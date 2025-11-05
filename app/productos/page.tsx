@@ -1,72 +1,97 @@
 "use client";
 
-import React from "react";
-
-interface Producto {
-  codigo: string;
-  descripcion: string;
-  precio: number;
-  kilosMes: number;
-  promVtaMes: number;
-}
+import { Package, Gauge } from "lucide-react";
 
 export default function ProductosPage() {
-  const productos: Producto[] = [
-    { codigo: "PTS1317405", descripcion: "DISHWASHER CAJA 4X5 KG", precio: 3902, kilosMes: 1000, promVtaMes: 3901500 },
-    { codigo: "PTS1316405", descripcion: "RINSE AID CAJA 4X5 KG", precio: 3497, kilosMes: 1500, promVtaMes: 5244750 },
-    { codigo: "PTS1010405", descripcion: "DELIMER CAJA 4X5 LTS", precio: 4577, kilosMes: 1000, promVtaMes: 4576500 },
-    { codigo: "PTS0305606", descripcion: "ALCOHOL GEL 6X800 ML", precio: 7004, kilosMes: 480, promVtaMes: 3361920 },
-    { codigo: "PTS1313405", descripcion: "DM-500 CAJA 4X5 KG", precio: 3284, kilosMes: 2000, promVtaMes: 6568000 },
-    { codigo: "PTS1312405", descripcion: "FOAMING CAUSTIC CLEANER FP CAJA 4X5 KGS", precio: 3709, kilosMes: 2000, promVtaMes: 7418000 },
-    { codigo: "PTS0312606", descripcion: "T2 HAND CLEANER CAJA 6X800 ML", precio: 6366, kilosMes: 480, promVtaMes: 3055680 },
-    { codigo: "PTS1304405", descripcion: "CHLORINATED DEGREASER CAJA 4X5 KG", precio: 3178, kilosMes: 2000, promVtaMes: 6356000 },
-    { codigo: "PTS0105405", descripcion: "CLEAN BY PEROXY CAJA 4X5 KG", precio: 2859, kilosMes: 500, promVtaMes: 1429500 },
-    { codigo: "PTS0104020", descripcion: "SPARLAC 60 ENV 20 KGS", precio: 7290, kilosMes: 500, promVtaMes: 3645000 },
+  const productos = [
+    { codigo: "PTS1317495", desc: "DISHWASHER CAJA 4X5 KG", precio: 3902, kilos: 1000 },
+    { codigo: "PTS1316495", desc: "RINSE AID CAJA 4X5 KG", precio: 3497, kilos: 800 },
+    { codigo: "PTS1010495", desc: "DELIMER CAJA 4X5 LTS", precio: 4577, kilos: 600 },
+    { codigo: "PTS3035666", desc: "ALCOHOL GEL 6X800 ML", precio: 7004, kilos: 400 },
+    { codigo: "PTS1313495", desc: "DM-500 CAJA 4X5 KG", precio: 3284, kilos: 500 },
+    { codigo: "PTS0105495", desc: "CLEAN BY PEROXY 4X5 KG", precio: 2859, kilos: 300 },
   ];
 
+  // Totales globales
+  const totalKilos = productos.reduce((a, p) => a + p.kilos, 0);
+  const totalMonto = productos.reduce((a, p) => a + p.kilos * p.precio, 0);
+
+  // Cálculos por producto
+  const productosCalculados = productos.map((p) => {
+    const total$ = p.kilos * p.precio;
+    const kilosLocal = p.kilos / 100;
+    const montoLocal = kilosLocal * p.precio;
+    const kilosSucursal = kilosLocal * 7;
+    const montoSucursal = montoLocal * 7;
+    return { ...p, total$, kilosLocal, montoLocal, kilosSucursal, montoSucursal };
+  });
+
   return (
-    <section className="p-8 bg-neutral-950 min-h-screen text-gray-200">
-      <h1 className="text-2xl font-bold text-amber-400 mb-6">
-        Convenio de Productos — Grupo Mil Sabores
+    <div className="p-6 text-white">
+      <h1 className="text-2xl font-bold text-amber-400 flex items-center gap-2 mb-6">
+        <Package size={22} /> Productos de Convenio – Distribución y Presupuesto
       </h1>
 
-      <div className="overflow-x-auto rounded-xl border border-gray-800 shadow-lg">
+      <div className="overflow-x-auto rounded-2xl border border-neutral-800 bg-neutral-900/70 shadow">
         <table className="min-w-full text-sm text-gray-300">
-          <thead className="bg-neutral-900 text-amber-400">
+          <thead className="bg-neutral-800 text-amber-400">
             <tr>
-              <th className="px-4 py-3 text-left">Código</th>
-              <th className="px-4 py-3 text-left">Descripción</th>
-              <th className="px-4 py-3 text-right">Precio Vta</th>
-              <th className="px-4 py-3 text-right">Kilos Mes</th>
-              <th className="px-4 py-3 text-right">Prom Vta Mes</th>
+              <th className="py-3 px-4 text-left">Código</th>
+              <th className="py-3 px-4 text-left">Producto</th>
+              <th className="py-3 px-4 text-right">Precio Unitario</th>
+              <th className="py-3 px-4 text-right">Total Kilos</th>
+              <th className="py-3 px-4 text-right">Total $</th>
+              <th className="py-3 px-4 text-right">Kg / Local</th>
+              <th className="py-3 px-4 text-right">$ / Local</th>
+              <th className="py-3 px-4 text-right">Kg / Sucursal (×7)</th>
+              <th className="py-3 px-4 text-right">$ / Sucursal (×7)</th>
             </tr>
           </thead>
           <tbody>
-            {productos.map((p) => (
-              <tr
-                key={p.codigo}
-                className="border-t border-gray-800 hover:bg-neutral-900 transition"
-              >
-                <td className="px-4 py-2 font-mono text-gray-100">{p.codigo}</td>
-                <td className="px-4 py-2">{p.descripcion}</td>
-                <td className="px-4 py-2 text-right">
-                  ${p.precio.toLocaleString("es-CL")}
-                </td>
-                <td className="px-4 py-2 text-right">
-                  {p.kilosMes.toLocaleString("es-CL")}
-                </td>
-                <td className="px-4 py-2 text-right">
-                  ${p.promVtaMes.toLocaleString("es-CL")}
+            {productosCalculados.map((p, i) => (
+              <tr key={i} className="border-t border-neutral-800 hover:bg-neutral-800/40 transition">
+                <td className="py-2 px-4">{p.codigo}</td>
+                <td className="py-2 px-4">{p.desc}</td>
+                <td className="py-2 px-4 text-right">${p.precio.toLocaleString("es-CL")}</td>
+                <td className="py-2 px-4 text-right">{p.kilos.toLocaleString("es-CL")} kg</td>
+                <td className="py-2 px-4 text-right">${p.total$.toLocaleString("es-CL")}</td>
+                <td className="py-2 px-4 text-right">{p.kilosLocal.toLocaleString("es-CL")} kg</td>
+                <td className="py-2 px-4 text-right">${p.montoLocal.toLocaleString("es-CL")}</td>
+                <td className="py-2 px-4 text-right text-amber-400 font-semibold">{p.kilosSucursal.toLocaleString("es-CL")} kg</td>
+                <td className="py-2 px-4 text-right text-amber-400 font-semibold">
+                  ${p.montoSucursal.toLocaleString("es-CL")}
                 </td>
               </tr>
             ))}
           </tbody>
+
+          <tfoot>
+            <tr className="border-t border-neutral-700 text-amber-400 font-bold bg-neutral-800/60">
+              <td colSpan={3} className="py-3 px-4 text-right">
+                Totales Globales:
+              </td>
+              <td className="py-3 px-4 text-right">{totalKilos.toLocaleString("es-CL")} kg</td>
+              <td className="py-3 px-4 text-right">${totalMonto.toLocaleString("es-CL")}</td>
+              <td colSpan={4}></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
-      <p className="text-sm text-gray-500 mt-4 italic">
-        Valores referenciales actualizados al convenio vigente — año 2025.
-      </p>
-    </section>
+      {/* Indicador global */}
+      <div className="mt-6 bg-neutral-900 border border-neutral-800 rounded-2xl p-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Gauge className="text-amber-400" size={24} />
+          <h2 className="text-lg font-semibold text-amber-400">
+            Total Convenio General
+          </h2>
+        </div>
+        <p className="text-right text-gray-300">
+          <span className="font-semibold text-white">{totalKilos.toLocaleString("es-CL")} kg</span> —{" "}
+          <span className="text-amber-400 font-bold">${totalMonto.toLocaleString("es-CL")}</span>
+        </p>
+      </div>
+    </div>
   );
 }
+
