@@ -29,11 +29,11 @@ export default function SucursalDetalle() {
       grupo: "Grupo Mil Sabores",
       rut: "78.523.412-8",
       direccion: "Av. Lo Bascuñán 287, Santiago",
-      totalConsumo: 11300000,
+      totalConsumo: 1130000,
       facturas: 30,
-      ordenes: 5,
+      ordenes: 25,
       productos: 20,
-      topeMensual: 12000000,
+      topeMensual: 1200000,
     },
   ];
 

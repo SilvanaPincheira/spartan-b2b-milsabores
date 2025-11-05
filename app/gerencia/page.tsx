@@ -1,19 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { BarChart3, Building2, Users, DollarSign } from "lucide-react";
+import { BarChart3, Building2, Users, DollarSign, Circle } from "lucide-react";
 
 export default function GerenciaPage() {
   const [zonaSeleccionada, setZonaSeleccionada] = useState<string | null>(null);
 
   // 🔹 Datos simulados base
   const razones = [
-    { nombre: "Grupo Mil Sabores", zonas: ["Zona 1", "Zona 2", "Zona 3"] },
-    { nombre: "Grupo Los Robles", zonas: ["Zona 4", "Zona 5", "Zona 6"] },
-    { nombre: "Grupo Jalisco", zonas: ["Zona 7", "Zona 8", "Zona 9", "Zona 10"] },
+    { nombre: "Grupo Mil Sabores", presupuesto: 120000000 },
+    { nombre: "Grupo Los Robles", presupuesto: 95000000 },
+    { nombre: "Grupo Jalisco", presupuesto: 88000000 },
   ];
 
-  // 🔹 Compras mensuales simuladas
+  // 🔹 Compras simuladas
   const compras = [
     { razon: "Grupo Mil Sabores", zona: "Zona 1", sucursal: "Tobalaba – Tanta", mes: 13500000, ult3m: 37500000, acumulado: 112000000 },
     { razon: "Grupo Mil Sabores", zona: "Zona 2", sucursal: "Providencia – Panchita", mes: 9800000, ult3m: 31000000, acumulado: 98700000 },
@@ -29,27 +29,68 @@ export default function GerenciaPage() {
   const totalMes = compras.reduce((a, b) => a + b.mes, 0);
   const total3m = compras.reduce((a, b) => a + b.ult3m, 0);
   const totalAcum = compras.reduce((a, b) => a + b.acumulado, 0);
+  const presupuestoGlobal = razones.reduce((a, b) => a + b.presupuesto, 0);
+  const avanceGlobal = Math.min((totalAcum / presupuestoGlobal) * 100, 120);
 
-  // 🔹 Agrupar por razón social
+  const colorBarra =
+    avanceGlobal >= 100
+      ? "bg-red-600"
+      : avanceGlobal >= 80
+      ? "bg-amber-500"
+      : "bg-green-600";
+
+  // 🔹 Totales por razón social
   const totalesPorRazon = razones.map((r) => {
     const grupo = compras.filter((c) => c.razon === r.nombre);
-    return {
-      nombre: r.nombre,
-      mes: grupo.reduce((a, b) => a + b.mes, 0),
-      ult3m: grupo.reduce((a, b) => a + b.ult3m, 0),
-      acumulado: grupo.reduce((a, b) => a + b.acumulado, 0),
-    };
+    const mes = grupo.reduce((a, b) => a + b.mes, 0);
+    const ult3m = grupo.reduce((a, b) => a + b.ult3m, 0);
+    const acumulado = grupo.reduce((a, b) => a + b.acumulado, 0);
+    const avance = (acumulado / r.presupuesto) * 100;
+
+    let estadoColor =
+      avance >= 100 ? "text-red-500" : avance >= 80 ? "text-amber-400" : "text-green-500";
+    let estadoTexto =
+      avance >= 100 ? "Sobre Presupuesto" : avance >= 80 ? "Cercano al Tope" : "En Rango";
+
+    return { ...r, mes, ult3m, acumulado, avance, estadoColor, estadoTexto };
   });
 
   // 🔹 Agrupar por zona
   const zonas = Array.from(new Set(compras.map((c) => c.zona))).map((z) => {
     const grupo = compras.filter((c) => c.zona === z);
+    const razon = grupo[0].razon;
+    const mes = grupo.reduce((a, b) => a + b.mes, 0);
+    const ult3m = grupo.reduce((a, b) => a + b.ult3m, 0);
+    const acumulado = grupo.reduce((a, b) => a + b.acumulado, 0);
+
+    // Presupuesto zonal (proporcional)
+    const razonPresupuesto = razones.find((r) => r.nombre === razon)?.presupuesto || 0;
+    const presupuestoZona = razonPresupuesto / 10; // dividir en 10 zonas por simplicidad
+    const avanceZona = (acumulado / presupuestoZona) * 100;
+
+    const estadoColor =
+      avanceZona >= 100
+        ? "text-red-500"
+        : avanceZona >= 80
+        ? "text-amber-400"
+        : "text-green-500";
+    const estadoTexto =
+      avanceZona >= 100
+        ? "Sobre Presupuesto"
+        : avanceZona >= 80
+        ? "Cercano al Tope"
+        : "En Rango";
+
     return {
       nombre: z,
-      razon: grupo[0].razon,
-      mes: grupo.reduce((a, b) => a + b.mes, 0),
-      ult3m: grupo.reduce((a, b) => a + b.ult3m, 0),
-      acumulado: grupo.reduce((a, b) => a + b.acumulado, 0),
+      razon,
+      mes,
+      ult3m,
+      acumulado,
+      presupuestoZona,
+      avanceZona,
+      estadoColor,
+      estadoTexto,
       sucursales: grupo,
     };
   });
@@ -65,11 +106,28 @@ export default function GerenciaPage() {
       </div>
 
       {/* RESUMEN GLOBAL */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
         <ResumenCard icon={DollarSign} titulo="Compra Mes Actual" valor={totalMes} />
         <ResumenCard icon={Building2} titulo="Últimos 3 Meses" valor={total3m} />
         <ResumenCard icon={Users} titulo="Acumulado Anual" valor={totalAcum} />
       </section>
+
+      {/* BARRA GLOBAL DE AVANCE */}
+      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 mb-10 shadow">
+        <h2 className="text-lg font-semibold text-amber-400 mb-3">
+          Presupuesto Global vs Acumulado
+        </h2>
+        <div className="w-full bg-neutral-800 rounded-full h-5 overflow-hidden mb-2">
+          <div className={`${colorBarra} h-5`} style={{ width: `${avanceGlobal}%` }}></div>
+        </div>
+        <p className="text-sm text-gray-300">
+          <span className="font-semibold text-white">
+            ${totalAcum.toLocaleString("es-CL")}
+          </span>{" "}
+          de ${presupuestoGlobal.toLocaleString("es-CL")} (
+          <span className="text-amber-400">{avanceGlobal.toFixed(1)}%</span>)
+        </p>
+      </div>
 
       {/* POR RAZÓN SOCIAL */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 mb-10">
@@ -79,22 +137,28 @@ export default function GerenciaPage() {
         <table className="min-w-full text-sm text-gray-300">
           <thead>
             <tr className="text-amber-400 border-b border-neutral-700">
-              <th className="py-2 text-left">Razón Social</th>
-              <th className="py-2 text-right">Mes Actual</th>
-              <th className="py-2 text-right">Últimos 3 Meses</th>
-              <th className="py-2 text-right">Acumulado Anual</th>
+              <th className="text-left py-2">Razón Social</th>
+              <th className="text-right py-2">Mes Actual</th>
+              <th className="text-right py-2">Últimos 3 Meses</th>
+              <th className="text-right py-2">Acumulado</th>
+              <th className="text-right py-2">Presupuesto Anual</th>
+              <th className="text-center py-2">Estado</th>
             </tr>
           </thead>
           <tbody>
             {totalesPorRazon.map((r, i) => (
-              <tr
-                key={i}
-                className="border-b border-neutral-800 hover:bg-neutral-800/40 cursor-pointer"
-              >
+              <tr key={i} className="border-b border-neutral-800 hover:bg-neutral-800/40">
                 <td className="py-2">{r.nombre}</td>
                 <td className="py-2 text-right">${r.mes.toLocaleString("es-CL")}</td>
                 <td className="py-2 text-right">${r.ult3m.toLocaleString("es-CL")}</td>
                 <td className="py-2 text-right">${r.acumulado.toLocaleString("es-CL")}</td>
+                <td className="py-2 text-right">${r.presupuesto.toLocaleString("es-CL")}</td>
+                <td className={`py-2 text-center font-semibold ${r.estadoColor}`}>
+                  <div className="flex items-center justify-center gap-2">
+                    <Circle size={10} className={r.estadoColor} />
+                    {r.estadoTexto}
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -112,6 +176,8 @@ export default function GerenciaPage() {
               <th className="text-right py-2">Mes Actual</th>
               <th className="text-right py-2">Últimos 3 Meses</th>
               <th className="text-right py-2">Acumulado</th>
+              <th className="text-right py-2">Presupuesto Zona</th>
+              <th className="text-center py-2">Estado</th>
             </tr>
           </thead>
           <tbody>
@@ -129,24 +195,30 @@ export default function GerenciaPage() {
                   <td className="py-2 text-right">${z.mes.toLocaleString("es-CL")}</td>
                   <td className="py-2 text-right">${z.ult3m.toLocaleString("es-CL")}</td>
                   <td className="py-2 text-right">${z.acumulado.toLocaleString("es-CL")}</td>
+                  <td className="py-2 text-right">${z.presupuestoZona.toLocaleString("es-CL")}</td>
+                  <td className={`py-2 text-center font-semibold ${z.estadoColor}`}>
+                    <div className="flex items-center justify-center gap-2">
+                      <Circle size={10} className={z.estadoColor} />
+                      {z.estadoTexto}
+                    </div>
+                  </td>
                 </tr>
 
-                {zonaSeleccionada === z.nombre && (
-                  <>
-                    {z.sucursales.map((s, j) => (
-                      <tr
-                        key={j}
-                        className="border-b border-neutral-900 bg-neutral-950/40 text-gray-400"
-                      >
-                        <td className="py-2 pl-8">↳ {s.sucursal}</td>
-                        <td className="py-2">{s.razon}</td>
-                        <td className="py-2 text-right">${s.mes.toLocaleString("es-CL")}</td>
-                        <td className="py-2 text-right">${s.ult3m.toLocaleString("es-CL")}</td>
-                        <td className="py-2 text-right">${s.acumulado.toLocaleString("es-CL")}</td>
-                      </tr>
-                    ))}
-                  </>
-                )}
+                {zonaSeleccionada === z.nombre &&
+                  z.sucursales.map((s, j) => (
+                    <tr
+                      key={j}
+                      className="border-b border-neutral-900 bg-neutral-950/40 text-gray-400"
+                    >
+                      <td className="py-2 pl-8">↳ {s.sucursal}</td>
+                      <td className="py-2">{s.razon}</td>
+                      <td className="py-2 text-right">${s.mes.toLocaleString("es-CL")}</td>
+                      <td className="py-2 text-right">${s.ult3m.toLocaleString("es-CL")}</td>
+                      <td className="py-2 text-right">${s.acumulado.toLocaleString("es-CL")}</td>
+                      <td className="py-2"></td>
+                      <td></td>
+                    </tr>
+                  ))}
               </>
             ))}
           </tbody>
