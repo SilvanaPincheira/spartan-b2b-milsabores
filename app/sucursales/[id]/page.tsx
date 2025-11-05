@@ -7,23 +7,41 @@ export default function SucursalDetalle() {
   const router = useRouter();
   const { id } = useParams();
 
-  // Datos simulados — puedes reemplazar por datos reales más adelante
   const sucursales = [
-    { id: "1", nombre: "Tobalaba – Local 1 – Tanta", grupo: "Grupo Los Robles", rut: "76.854.879-5", direccion: "Av. El Valle 541, Huechuraba", totalConsumo: 8700000, facturas: 21, ordenes: 3, productos: 16 },
-    { id: "2", nombre: "Tobalaba – Local 2 – Osaka", grupo: "Grupo Los Robles", rut: "76.854.879-5", direccion: "Av. El Valle 541, Huechuraba", totalConsumo: 9200000, facturas: 24, ordenes: 2, productos: 14 },
-    { id: "3", nombre: "Tobalaba – Local 3 – Panchita", grupo: "Grupo Mil Sabores", rut: "78.523.412-8", direccion: "Av. Lo Bascuñán 287, Santiago", totalConsumo: 11300000, facturas: 30, ordenes: 5, productos: 20 },
-    { id: "4", nombre: "Tobalaba – Local 4 – Jalisco", grupo: "Grupo Mil Sabores", rut: "78.523.412-8", direccion: "Av. Lo Bascuñán 287, Santiago", totalConsumo: 8600000, facturas: 25, ordenes: 2, productos: 15 },
+    { id: "1", nombre: "Tobalaba – Local 1 – Tanta", grupo: "Grupo Los Robles", rut: "76.854.879-5", direccion: "Av. El Valle 541, Huechuraba", totalConsumo: 8700000, facturas: 21, ordenes: 3, productos: 16, topeMensual: 10000000 },
+    { id: "2", nombre: "Tobalaba – Local 2 – Osaka", grupo: "Grupo Los Robles", rut: "76.854.879-5", direccion: "Av. El Valle 541, Huechuraba", totalConsumo: 9200000, facturas: 24, ordenes: 2, productos: 14, topeMensual: 11000000 },
+    { id: "3", nombre: "Tobalaba – Local 3 – Panchita", grupo: "Grupo Mil Sabores", rut: "78.523.412-8", direccion: "Av. Lo Bascuñán 287, Santiago", totalConsumo: 11300000, facturas: 30, ordenes: 5, productos: 20, topeMensual: 12000000 },
+    { id: "4", nombre: "Tobalaba – Local 4 – Jalisco", grupo: "Grupo Mil Sabores", rut: "78.523.412-8", direccion: "Av. Lo Bascuñán 287, Santiago", totalConsumo: 8600000, facturas: 25, ordenes: 2, productos: 15, topeMensual: 10000000 },
   ];
 
   const sucursal = sucursales.find((s) => s.id === id);
-
   if (!sucursal) {
-    return (
-      <div className="p-6 text-gray-300">
-        <p>No se encontró la sucursal solicitada.</p>
-      </div>
-    );
+    return <div className="p-6 text-gray-300">No se encontró la sucursal solicitada.</div>;
   }
+
+  // Historial simulado (enero - octubre)
+  const historial = [
+    { mes: "Enero", pedidos: 18 },
+    { mes: "Febrero", pedidos: 20 },
+    { mes: "Marzo", pedidos: 22 },
+    { mes: "Abril", pedidos: 19 },
+    { mes: "Mayo", pedidos: 23 },
+    { mes: "Junio", pedidos: 25 },
+    { mes: "Julio", pedidos: 28 },
+    { mes: "Agosto", pedidos: 27 },
+    { mes: "Septiembre", pedidos: 30 },
+    { mes: "Octubre", pedidos: 31 },
+  ];
+
+  // Cálculo de sugerido = promedio últimos 3 meses
+  const ultimos3 = historial.slice(-3).map((h) => h.pedidos);
+  const sugeridoUnidades = Math.round(ultimos3.reduce((a, b) => a + b, 0) / ultimos3.length);
+  const sugeridoPesos = Math.round((sugeridoUnidades * 350000) / 10); // ejemplo: cada pedido promedio = $350.000
+  const porcentaje = Math.min((sucursal.totalConsumo / sucursal.topeMensual) * 100, 100);
+
+  // Color según porcentaje
+  const color =
+    porcentaje < 70 ? "bg-red-600" : porcentaje < 90 ? "bg-amber-500" : "bg-green-600";
 
   return (
     <div className="p-6 text-white">
@@ -47,62 +65,67 @@ export default function SucursalDetalle() {
         </p>
       </header>
 
-      {/* MAPA */}
-<div className="rounded-2xl overflow-hidden mb-8 border border-neutral-800 shadow-lg">
-  <iframe
-    src={`https://www.google.com/maps?q=${encodeURIComponent(sucursal.direccion)}&output=embed`}
-    width="100%"
-    height="300"
-    style={{ border: 0 }}
-    loading="lazy"
-    allowFullScreen
-  ></iframe>
-</div>
-
-
       {/* KPIs */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <KpiCard
-          icon={Gauge}
-          titulo="Consumo Total"
-          valor={`$${sucursal.totalConsumo.toLocaleString("es-CL")}`}
-        />
+        <KpiCard icon={Gauge} titulo="Consumo Total" valor={`$${sucursal.totalConsumo.toLocaleString("es-CL")}`} />
         <KpiCard icon={Receipt} titulo="Facturas" valor={sucursal.facturas} />
         <KpiCard icon={FileText} titulo="Órdenes Pendientes" valor={sucursal.ordenes} />
         <KpiCard icon={Package} titulo="Productos Activos" valor={sucursal.productos} />
       </section>
 
-      {/* TABLA SIMPLE */}
+      {/* AVANCE DE CONSUMO */}
+      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 mb-8 shadow-lg">
+        <h2 className="text-lg font-semibold text-amber-400 mb-2">Avance de Consumo Mensual</h2>
+        <div className="w-full bg-neutral-800 rounded-full h-4 overflow-hidden mb-3">
+          <div
+            className={`${color} h-4 transition-all duration-500`}
+            style={{ width: `${porcentaje}%` }}
+          ></div>
+        </div>
+        <p className="text-sm text-gray-300">
+          <span className="font-semibold text-white">
+            ${sucursal.totalConsumo.toLocaleString("es-CL")}
+          </span>{" "}
+          de ${sucursal.topeMensual.toLocaleString("es-CL")} (
+          <span className="text-amber-400">{porcentaje.toFixed(1)}%</span>)
+        </p>
+      </div>
+
+      {/* HISTORIAL DE PEDIDOS */}
       <div className="bg-neutral-900 rounded-2xl border border-neutral-800 shadow-lg p-6">
         <h2 className="text-lg font-semibold text-amber-400 mb-3">
-          Historial de Consumos
+          Historial de Pedidos (Enero–Octubre)
         </h2>
         <table className="min-w-full text-sm text-gray-300">
           <thead>
             <tr className="text-amber-400 border-b border-neutral-700">
-              <th className="text-left py-2">Periodo</th>
-              <th className="text-right py-2">Monto</th>
-              <th className="text-right py-2">Facturas</th>
+              <th className="text-left py-2">Mes</th>
+              <th className="text-right py-2">Pedidos</th>
             </tr>
           </thead>
           <tbody>
-            {[
-              ["Enero 2025", "$1.850.000", "3"],
-              ["Febrero 2025", "$2.100.000", "5"],
-              ["Marzo 2025", "$2.850.000", "7"],
-              ["Abril 2025", "$1.900.000", "6"],
-            ].map(([periodo, monto, facturas], i) => (
-              <tr
-                key={i}
-                className="border-b border-neutral-800 hover:bg-neutral-800/40 transition"
-              >
-                <td className="py-2">{periodo}</td>
-                <td className="py-2 text-right">{monto}</td>
-                <td className="py-2 text-right">{facturas}</td>
+            {historial.map((item, i) => (
+              <tr key={i} className="border-b border-neutral-800 hover:bg-neutral-800/40 transition">
+                <td className="py-2">{item.mes}</td>
+                <td className="py-2 text-right">{item.pedidos}</td>
               </tr>
             ))}
+            <tr className="bg-neutral-800/60 font-semibold text-amber-400 border-t border-neutral-700">
+              <td className="py-2">Noviembre (Sugerido)</td>
+              <td className="py-2 text-right">{sugeridoUnidades}</td>
+            </tr>
           </tbody>
         </table>
+        <div className="mt-4 text-sm text-gray-400">
+          <p>
+            Sugerido de noviembre:{" "}
+            <span className="text-white font-semibold">{sugeridoUnidades} pedidos</span>{" "}
+            (~${sugeridoPesos.toLocaleString("es-CL")})
+          </p>
+          <p className="text-xs italic mt-1">
+            Calculado como promedio de los últimos 3 meses (Ago–Oct).
+          </p>
+        </div>
       </div>
     </div>
   );
