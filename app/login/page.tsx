@@ -1,88 +1,158 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const SUCURSALES = [
-  { id: "1", nombre: "Tobalaba – Local 1 – Tanta" },
-  { id: "2", nombre: "Tobalaba – Local 2 – Osaka" },
-  { id: "3", nombre: "Tobalaba – Local 3 – Panchita" },
-  { id: "4", nombre: "Tobalaba – Local 4 – Jalisco" },
-  { id: "5", nombre: "Tobalaba – Local 5 – La Mar" },
-  { id: "6", nombre: "Tobalaba – Local 6 – Barra Chalaca" },
-  { id: "7", nombre: "Tobalaba – Local 7 – El Japonés" },
-];
+// === URLs ===
+
+// HOJA Roles (usuario / clave)
+const ROLES_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLKyOAM6dchMCX6y7VGm4S4Qkmzw4193ktJo2ZZGLawP-tsNqKHZ9ONRLI19J99E7EQuPq9mZdjnES/pub?gid=0&single=true&output=csv";
+
+// HOJA Sucursales Mil Sabores
+const LOCALES_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLKyOAM6dchMCX6y7VGm4S4Qkmzw4193ktJo2ZZGLawP-tsNqKHZ9ONRLI19J99E7EQuPq9mZdjnES/pub?gid=1153805717&single=true&output=csv";
+
+interface RolItem {
+  usuario: string;
+  clave: string;
+}
+
+interface LocalItem {
+  sucursal: string;
+}
 
 export default function LoginPage() {
   const router = useRouter();
-  const [rol, setRol] = useState<"Auditora" | "Supervisora" | "Gerencia">("Auditora");
-  const [userName, setUserName] = useState("");
-  const [sucursalId, setSucursalId] = useState("1");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [usuarios, setUsuarios] = useState<RolItem[]>([]);
+  const [locales, setLocales] = useState<LocalItem[]>([]);
+
+  const [usuario, setUsuario] = useState("");
+  const [clave, setClave] = useState("");
+  const [sucursalSeleccionada, setSucursalSeleccionada] = useState("");
+
+  // === 1. Cargar usuarios ===
+  useEffect(() => {
+    fetch(ROLES_URL)
+      .then((res) => res.text())
+      .then((csv) => {
+        const lines = csv.split("\n").slice(1);
+        const data = lines
+          .map((l) => l.split(","))
+          .filter((cols) => cols.length >= 2)
+          .map((cols) => ({
+            usuario: cols[0].trim(),
+            clave: cols[1].trim(),
+          }));
+
+        setUsuarios(data);
+      });
+  }, []);
+
+  // === 2. Cargar sucursales ===
+  useEffect(() => {
+    fetch(LOCALES_URL)
+      .then((res) => res.text())
+      .then((csv) => {
+        const lines = csv.split("\n").slice(1);
+        const data = lines
+          .map((l) => l.split(","))
+          .filter((cols) => cols.length >= 1)
+          .map((cols) => ({
+            sucursal: cols[0].trim(),
+          }));
+
+        setLocales(data);
+      });
+  }, []);
+
+  // === VALIDAR LOGIN ===
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const sucursal = SUCURSALES.find(s => s.id === sucursalId);
 
-    // Guarda sesión simulada
-    localStorage.setItem("rol", rol);
-    localStorage.setItem("userName", userName || rol);
-    if (rol === "Auditora") {
-      localStorage.setItem("sucursalId", sucursalId);
-      localStorage.setItem("sucursalNombre", sucursal?.nombre || "");
-    } else {
-      localStorage.removeItem("sucursalId");
-      localStorage.removeItem("sucursalNombre");
+    const u = usuarios.find((x) => x.usuario === usuario);
+
+    if (!u) {
+      alert("Usuario no encontrado");
+      return;
     }
 
-    // Redirecciones
-    if (rol === "Auditora") {
-      router.push("/sucursales/historial");
-    } else if (rol === "Supervisora") {
-      router.push("/sucursales/historial");
-    } else {
-      router.push("/"); // o dashboard general de gerencia
+    if (u.clave !== clave.trim()) {
+      alert("Clave incorrecta");
+      return;
     }
+
+    if (!sucursalSeleccionada) {
+      alert("Selecciona una sucursal");
+      return;
+    }
+
+    // Guardar sesión
+    localStorage.setItem("usuario", usuario);
+    localStorage.setItem("sucursalSeleccionada", sucursalSeleccionada);
+
+    router.push("/"); // dashboard principal
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-950 text-white p-6">
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleLogin}
         className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-lg"
       >
-        <h1 className="text-2xl font-bold text-amber-400 mb-2">Portal B2B – Mil Sabores</h1>
-        <p className="text-sm text-gray-400 mb-6">Inicia sesión para continuar</p>
+        <h1 className="text-2xl font-bold text-amber-400 mb-2">
+          Portal B2B – Mil Sabores
+        </h1>
+        <p className="text-sm text-gray-400 mb-6">
+          Inicia sesión para continuar
+        </p>
 
-        <label className="block text-sm text-gray-300 mb-1">Rol</label>
+        {/* Usuario */}
+        <label className="block text-sm text-gray-300 mb-1">Usuario</label>
         <select
           className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 mb-4"
-          value={rol}
-          onChange={e => setRol(e.target.value as any)}
+          value={usuario}
+          onChange={(e) => setUsuario(e.target.value)}
         >
-          <option>Auditora</option>
-          <option>Supervisora</option>
-          <option>Gerencia</option>
+          <option value="">Seleccione usuario</option>
+          {usuarios.map((u, i) => (
+            <option key={i} value={u.usuario}>
+              {u.usuario}
+            </option>
+          ))}
         </select>
 
-        <label className="block text-sm text-gray-300 mb-1">Nombre</label>
-        <input
-          className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 mb-4"
-          placeholder="Tu nombre"
-          value={userName}
-          onChange={e => setUserName(e.target.value)}
-        />
-
-        {/* Selección de sucursal solo para auditora */}
-        {rol === "Auditora" && (
+        {/* Clave */}
+        {usuario && (
           <>
-            <label className="block text-sm text-gray-300 mb-1">Sucursal</label>
+            <label className="block text-sm text-gray-300 mb-1">Clave</label>
+            <input
+              type="password"
+              className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 mb-4"
+              placeholder="Clave"
+              value={clave}
+              onChange={(e) => setClave(e.target.value)}
+            />
+          </>
+        )}
+
+        {/* Sucursal */}
+        {usuario && (
+          <>
+            <label className="block text-sm text-gray-300 mb-1">
+              Sucursal
+            </label>
             <select
-              className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 mb-6"
-              value={sucursalId}
-              onChange={e => setSucursalId(e.target.value)}
+              className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 mb-4"
+              value={sucursalSeleccionada}
+              onChange={(e) => setSucursalSeleccionada(e.target.value)}
             >
-              {SUCURSALES.map(s => (
-                <option key={s.id} value={s.id}>{s.nombre}</option>
+              <option value="">Seleccione sucursal</option>
+              {locales.map((l, i) => (
+                <option key={i} value={l.sucursal}>
+                  {l.sucursal}
+                </option>
               ))}
             </select>
           </>

@@ -9,15 +9,15 @@ export default function SidebarWrapper({ children }: { children: React.ReactNode
   const router = useRouter();
 
   useEffect(() => {
-    const rol = localStorage.getItem("rol");
+    const usuario = localStorage.getItem("usuario");
 
-    // Si no hay rol y no estamos en /login, redirige al login
-    if (!rol && pathname !== "/login") {
+    // Si no hay usuario y no estamos en /login -> redirige
+    if (!usuario && pathname !== "/login") {
       router.push("/login");
     }
   }, [pathname, router]);
 
-  // Oculta el sidebar en la vista de login
+  // Ocultar sidebar en login
   const ocultarSidebar = pathname === "/login";
 
   return (
